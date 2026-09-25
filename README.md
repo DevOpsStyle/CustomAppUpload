@@ -216,7 +216,8 @@ sulla Container App a runtime. I due secret non servono per compilare l'immagine
 e non devono essere passati a GitHub come argomenti di build.
 
 Il workflow [ci.yml](.github/workflows/ci.yml) effettua typecheck, test, build e smoke
-test del container senza credenziali; **non fa deploy e non crea infrastruttura**.
+test del container senza credenziali, oltre ai test browser Chromium, Firefox e
+WebKit; **non fa deploy e non crea infrastruttura**.
 Puo' convivere con il workflow di deployment generato dalla Container App.
 
 ## 5. Prova completa
@@ -236,6 +237,21 @@ Test automatici locali:
 ```powershell
 npm run check
 ```
+
+Test con browser reali, su backend locale e storage di test:
+
+```powershell
+npx playwright install chromium firefox webkit
+npm run test:browser
+```
+
+Questi test verificano upload a blocchi, rimozione degli upload non validi e
+logout tramite l'interfaccia reale. Non usano credenziali Microsoft e non
+contattano Azure o Fabric. Il client imposta `referrerPolicy: "same-origin"`
+sulle richieste API: Firefox e WebKit possono altrimenti inviare `Origin: null`
+con `mode: "same-origin"` e la policy globale `no-referrer`, causando un 403.
+La policy globale, anche sul callback OAuth, resta `no-referrer`; il server
+continua a richiedere sia l'origine esatta sia il token CSRF della sessione.
 
 I test usano sostituti in memoria di Entra e OneLake esclusivamente nella cartella
 `tests`; verificano i contratti e i controlli del backend, non i permessi reali del
@@ -290,7 +306,8 @@ Anche tabella e report vanno protetti con le autorizzazioni/RLS appropriate.
 | `AADSTS50011` | Redirect Web identico ad `APP_BASE_URL` + `/auth/callback` |
 | Login non riuscito | Tenant, client ID, **Value** del secret, scadenza, consenso, log Entra |
 | Ritorno al login dopo il callback | HTTPS, `APP_BASE_URL`, cookie Secure e singola replica |
-| OneLake 403 | Permessi dell'utente, ReadWrite, policy del tenant e rete |
+| `CSRF_REJECTED` (403) | Blocco locale prima di OneLake: versione client aggiornata, `APP_BASE_URL` uguale all'origine HTTPS del browser e sessione corrente. Non disabilitare i controlli CSRF |
+| `ONELAKE_FORBIDDEN` (403) | Permessi dell'utente, ReadWrite, policy del tenant e rete |
 | OneLake 404 | ID del workspace/Lakehouse e cartella `Files/demo` esistente |
 | Preview non supportata | Codec/formato del browser; usa il download |
 | Upload scaduto dopo deployment | Nuovo login e nuovo upload; non c'e' ripresa fra processi |

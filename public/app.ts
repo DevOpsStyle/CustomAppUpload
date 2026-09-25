@@ -321,6 +321,8 @@ async function request<T>(
       headers,
       credentials: "same-origin",
       mode: "same-origin",
+      // Firefox/WebKit otherwise inherit no-referrer and send Origin: null on mutations.
+      referrerPolicy: "same-origin",
       cache: "no-store",
       redirect: "error",
       signal: controller.signal,

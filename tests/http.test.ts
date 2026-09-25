@@ -102,6 +102,9 @@ test("mutation requires both the correct CSRF token and configured origin", asyn
   const csrf = await signIn(agent);
   const body = { path: "", fileName: "photo.jpg", size: 64 };
   await agent.post("/api/uploads").send(body).expect(403);
+  await agent.post("/api/uploads").set("X-CSRF-Token", csrf).send(body).expect(403);
+  const opaqueOrigin = await agent.post("/api/uploads").set("Origin", "null").set("X-CSRF-Token", csrf).send(body).expect(403);
+  assert.equal(opaqueOrigin.body.error.code, "CSRF_REJECTED");
   await agent.post("/api/uploads").set("Origin", "http://localhost:3000").set("X-CSRF-Token", "wrong").send(body).expect(403);
   await agent.post("/api/uploads").set("Origin", "https://evil.example.invalid").set("X-CSRF-Token", csrf).send(body).expect(403);
   assert.equal(storage.files.size, 0);
