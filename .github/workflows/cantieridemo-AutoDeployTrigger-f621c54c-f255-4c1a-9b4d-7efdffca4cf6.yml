@@ -1,0 +1,45 @@
+name: Trigger auto deployment for cantieridemo
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/cantieridemo-AutoDeployTrigger-f621c54c-f255-4c1a-9b4d-7efdffca4cf6.yml'
+
+  # Allow manual trigger 
+  workflow_dispatch:
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.CANTIERIDEMO_AZURE_CREDENTIALS }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v2
+        with:
+          appSourcePath: ${{ github.workspace }}
+          _dockerfilePathKey_: _dockerfilePath_
+          _targetLabelKey_: _targetLabel_
+          registryUrl: custommcp.azurecr.io
+          registryUsername: ${{ secrets.CANTIERIDEMO_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.CANTIERIDEMO_REGISTRY_PASSWORD }}
+          containerAppName: cantieridemo
+          resourceGroup: CustomMCP
+          imageToBuild: custommcp.azurecr.io/cantieridemo:${{ github.sha }}
+          
+            
+
+     
+
