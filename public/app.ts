@@ -142,6 +142,11 @@ const previewStatus = element("preview-status", HTMLParagraphElement);
 const previewError = element("preview-error", HTMLParagraphElement);
 const downloadLink = element("download-link", HTMLAnchorElement);
 const previewLogin = element("preview-login", HTMLAnchorElement);
+const deleteDialog = element("delete-dialog", HTMLDialogElement);
+const deleteFileName = element("delete-file-name", HTMLParagraphElement);
+const deleteError = element("delete-error", HTMLParagraphElement);
+const deleteCancel = element("delete-cancel", HTMLButtonElement);
+const deleteConfirm = element("delete-confirm", HTMLButtonElement);
 
 let session: AuthenticatedSession | null = null;
 let expired = false;
@@ -168,6 +173,9 @@ let previewVersion = 0;
 let previewOpener: HTMLElement | null = null;
 let previewFile: FileEntry | null = null;
 let downloadPending = false;
+let fileToDelete: FileEntry | null = null;
+let deleteOpener: HTMLElement | null = null;
+let deletePending = false;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -451,6 +459,10 @@ function handleLoginRedirect(): void {
 }
 
 function navigationAllowed(): boolean {
+  if (deletePending) {
+    message(deleteError, "Eliminazione in corso. Attendi la conferma prima di lasciare la pagina.");
+    return false;
+  }
   if (uploadActive) {
     message(uploadStatus, "Attendi la conferma oppure annulla il caricamento prima di cambiare pagina.");
     return false;
@@ -484,9 +496,9 @@ function showPage(target: Page): void {
 }
 
 function updateControls(): void {
-  const locked = uploadActive || expired || logoutPending || !session;
+  const locked = uploadActive || deletePending || expired || logoutPending || !session;
   logoutButton.disabled = locked;
-  backButton.disabled = uploadActive || logoutPending;
+  backButton.disabled = uploadActive || deletePending || logoutPending;
   browseButton.disabled = locked;
   uploadButton.disabled = locked;
   refreshButton.disabled = locked || directoryLoading;
@@ -507,8 +519,11 @@ function updateControls(): void {
   destinationButton.disabled = locked;
   downloadLink.setAttribute("aria-disabled", String(locked || downloadPending));
   previewLogin.hidden = !expired;
+  deleteConfirm.disabled = locked || !fileToDelete;
+  deleteConfirm.textContent = deletePending ? "Eliminazione in corso..." : "Elimina file";
+  deleteCancel.disabled = deletePending;
   for (const button of document.querySelectorAll<HTMLButtonElement>("#breadcrumbs button, #file-list button, #upload-list button")) {
-    button.disabled = locked;
+    button.disabled = locked || (directoryLoading && button.classList.contains("file-delete"));
   }
 }
 
@@ -583,7 +598,7 @@ function renderBreadcrumbs(path: string): void {
 function renderFiles(): void {
   fileList.replaceChildren();
   for (const entry of entries) {
-    const item = create("li");
+    const item = create("li", "file-row");
     const button = create("button", "file-card");
     button.type = "button";
     button.setAttribute("aria-label", `${entry.isDirectory ? "Apri cartella" : "Apri file"} ${entry.name}`);
@@ -599,10 +614,67 @@ function renderFiles(): void {
       }
     });
     item.append(button);
+    if (!entry.isDirectory) {
+      const remove = create("button", "button danger file-delete", "Elimina");
+      remove.type = "button";
+      remove.setAttribute("aria-label", `Elimina file ${entry.name}`);
+      remove.addEventListener("click", () => openDelete(entry, remove));
+      item.append(remove);
+    }
     fileList.append(item);
   }
   emptyFiles.hidden = !directoryLoaded || entries.length > 0 || directoryLoading;
   updateControls();
+}
+
+function openDelete(file: FileEntry, opener: HTMLElement): void {
+  if (!navigationAllowed() || directoryLoading) return;
+  try {
+    requireSession();
+    if (file.isDirectory) throw new RequestFailure("Non puoi eliminare cartelle da questa app.", 400, "DIRECTORY_DELETE_NOT_ALLOWED");
+    fileToDelete = file;
+    deleteOpener = opener;
+    deleteFileName.textContent = file.name;
+    message(deleteError, "");
+    updateControls();
+    deleteDialog.showModal();
+    document.body.classList.add("dialog-open");
+    deleteCancel.focus();
+  } catch (error) {
+    message(globalNotice, errorMessage(error));
+  }
+}
+
+async function deleteSelectedFile(): Promise<void> {
+  if (deletePending) return;
+  const file = fileToDelete;
+  if (!file) {
+    message(deleteError, "Seleziona nuovamente il file da eliminare.");
+    return;
+  }
+  let deleted = false;
+  deletePending = true;
+  message(deleteError, "");
+  updateControls();
+  window.addEventListener("beforeunload", beforeUnload);
+  try {
+    requireSession();
+    await request(`/api/files?${new URLSearchParams({ path: file.path })}`, { method: "DELETE" }, async (response) => {
+      if (response.status !== 204) throw invalidResponse();
+    });
+    deleted = true;
+  } catch (error) {
+    message(deleteError, `Eliminazione non confermata. ${errorMessage(error)}\nSe la connessione si \u00e8 interrotta, aggiorna l'elenco prima di riprovare.`);
+  } finally {
+    deletePending = false;
+    window.removeEventListener("beforeunload", beforeUnload);
+    updateControls();
+  }
+  if (deleted) {
+    deleteDialog.close();
+    await loadDirectory(currentPath);
+    message(globalNotice, `File "${file.name}" eliminato da OneLake.`);
+  }
 }
 
 async function loadDirectory(path: string, cursor: string | null = null): Promise<void> {
@@ -1108,6 +1180,19 @@ startButton.addEventListener("click", () => {
 cancelButton.addEventListener("click", cancelUploads);
 destinationButton.addEventListener("click", () => openFiles(uploadPath));
 logoutButton.addEventListener("click", () => { void logout(); });
+deleteConfirm.addEventListener("click", () => {
+  void deleteSelectedFile().catch((error: unknown) => message(deleteError, errorMessage(error)));
+});
+deleteCancel.addEventListener("click", () => { if (!deletePending) deleteDialog.close(); });
+deleteDialog.addEventListener("cancel", (event) => { if (deletePending) event.preventDefault(); });
+deleteDialog.addEventListener("close", () => {
+  fileToDelete = null;
+  document.body.classList.remove("dialog-open");
+  if (deleteOpener?.isConnected) deleteOpener.focus({ preventScroll: true });
+  else if (page === "files") headings.files.focus({ preventScroll: true });
+  deleteOpener = null;
+  updateControls();
+});
 element("preview-close", HTMLButtonElement).addEventListener("click", () => previewDialog.close());
 element("preview-done", HTMLButtonElement).addEventListener("click", () => previewDialog.close());
 previewDialog.addEventListener("close", clearPreview);

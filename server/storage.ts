@@ -24,6 +24,7 @@ export interface MediaStorage {
   append(path: string, data: Buffer, offset: number): Promise<void>;
   flush(path: string, size: number): Promise<void>;
   publish(source: string, destination: string, uploadId: string): Promise<FileEntry>;
+  deleteFile(path: string): Promise<void>;
   remove(path: string): Promise<void>;
 }
 
@@ -140,5 +141,17 @@ export class OneLakeStorage implements MediaStorage {
 
   async remove(path: string): Promise<void> {
     await this.fileSystem.getFileClient(this.path(path)).deleteIfExists();
+  }
+
+  async deleteFile(path: string): Promise<void> {
+    const client = this.fileSystem.getFileClient(this.path(relativePath(path, false)));
+    const properties = await client.getSystemProperties();
+    if (properties.isDirectory) {
+      throw new AppError(400, "DIRECTORY_DELETE_NOT_ALLOWED", "Puoi eliminare soltanto singoli file, non cartelle.");
+    }
+    if (properties.isDirectory !== false || !properties.etag) {
+      throw new AppError(502, "INVALID_STORAGE_RESPONSE", "Impossibile verificare il tipo e la versione del file da eliminare.");
+    }
+    await client.delete(false, { conditions: { ifMatch: properties.etag } });
   }
 }

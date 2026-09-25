@@ -4,6 +4,7 @@ import type { FileEntry, FilesResponse } from "../shared/contracts.js";
 import type { AuthAttempt, AuthProvider, AuthSession } from "../server/auth.js";
 import { loadConfig } from "../server/config.js";
 import type { AppConfig } from "../server/config.js";
+import { AppError } from "../server/errors.js";
 import { mediaInfo } from "../server/media.js";
 import { fileNameOf, isVisiblePath } from "../server/paths.js";
 import type { ByteRange } from "../server/ranges.js";
@@ -39,6 +40,8 @@ export class StorageFailure extends Error {
 export class FakeStorage implements MediaStorage {
   files = new Map<string, { data: Buffer; metadata: Record<string, string> }>();
   forbidden = false;
+  deleteForbidden = false;
+  deleteCalls = 0;
   appendCalls = 0;
   flushCalls = 0;
   moveCalls = 0;
@@ -140,6 +143,17 @@ export class FakeStorage implements MediaStorage {
   async remove(path: string): Promise<void> {
     this.authorize();
     this.files.delete(path);
+  }
+
+  async deleteFile(path: string): Promise<void> {
+    this.authorize();
+    if (this.deleteForbidden) throw new StorageFailure(403);
+    if ([...this.files.keys()].some((name) => name.startsWith(path + "/"))) {
+      throw new AppError(400, "DIRECTORY_DELETE_NOT_ALLOWED", "Puoi eliminare soltanto singoli file, non cartelle.");
+    }
+    if (!this.files.has(path)) throw new StorageFailure(404);
+    this.files.delete(path);
+    this.deleteCalls++;
   }
 }
 

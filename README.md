@@ -12,6 +12,9 @@ Il progetto prepara il container; **non crea risorse Azure e non esegue deploy**
 - Login Microsoft Entra ID, limitato al tenant configurato.
 - Cartella iniziale `MaterialiCantiere / Files/demo`, nel workspace `Cantieri`.
   Navigazione delle sottocartelle, elenco paginato, anteprima e download.
+- Eliminazione dei singoli file dall'elenco, con conferma del nome prima di
+  procedere. Usa i permessi OneLake dell'utente, non consente cancellazioni di
+  cartelle e non offre un cestino o un annullamento dall'app.
 - Upload multiplo di foto/video, un file alla volta, massimo **250 MB per file**
   (250.000.000 byte), modificabile tramite `MAX_UPLOAD_MB`.
 - Upload a blocchi da 4 MiB, progresso, annullamento e retry dei blocchi.
@@ -245,7 +248,8 @@ npx playwright install chromium firefox webkit
 npm run test:browser
 ```
 
-Questi test verificano upload a blocchi, rimozione degli upload non validi e
+Questi test verificano upload a blocchi, rimozione degli upload non validi,
+conferma/annullamento dell'eliminazione file, rifiuto per sola lettura e
 logout tramite l'interfaccia reale. Non usano credenziali Microsoft e non
 contattano Azure o Fabric. Il client imposta `referrerPolicy: "same-origin"`
 sulle richieste API: Firefox e WebKit possono altrimenti inviare `Origin: null`
@@ -308,6 +312,8 @@ Anche tabella e report vanno protetti con le autorizzazioni/RLS appropriate.
 | Ritorno al login dopo il callback | HTTPS, `APP_BASE_URL`, cookie Secure e singola replica |
 | `CSRF_REJECTED` (403) | Blocco locale prima di OneLake: versione client aggiornata, `APP_BASE_URL` uguale all'origine HTTPS del browser e sessione corrente. Non disabilitare i controlli CSRF |
 | `ONELAKE_FORBIDDEN` (403) | Permessi dell'utente, ReadWrite, policy del tenant e rete |
+| `INVALID_STORAGE_RESPONSE` (502) nell'elenco | Aggiorna l'app: il percorso iniziale non deve aggiungere uno slash vuoto. I risultati devono essere figli diretti della cartella richiesta; i controlli sui percorsi restano attivi |
+| Eliminazione file negata | Serve il permesso di scrittura sulla cartella; non servono nuovi permessi API Entra. Le cartelle non sono eliminabili. Un file cambiato durante l'operazione richiede una nuova verifica |
 | OneLake 404 | ID del workspace/Lakehouse e cartella `Files/demo` esistente |
 | Preview non supportata | Codec/formato del browser; usa il download |
 | Upload scaduto dopo deployment | Nuovo login e nuovo upload; non c'e' ripresa fra processi |

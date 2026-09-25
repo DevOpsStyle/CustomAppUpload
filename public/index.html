@@ -277,6 +277,9 @@
       .crumb[aria-current="page"] { color: var(--cp-text); font-weight: 600; }
       .list-status { margin-bottom: 12px; font-size: 0.875rem; color: var(--cp-text-muted); }
       .file-list, .upload-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+      .file-row { display: flex; align-items: center; gap: 8px; }
+      .file-row .file-card { flex: 1; min-width: 0; width: auto; }
+      .file-row .file-delete { flex: 0 0 auto; padding: 8px 12px; }
       .file-card {
         display: flex;
         align-items: center;
@@ -512,7 +515,7 @@
         <section id="files-view" aria-labelledby="files-title" hidden>
           <p class="eyebrow">Il materiale del team</p>
           <h1 id="files-title" tabindex="-1">Visualizza materiale</h1>
-          <p class="description">Apri una cartella o seleziona un file per vederne l'anteprima. Gli originali si caricano solo quando li apri.</p>
+          <p class="description">Apri una cartella o un file per l'anteprima. Puoi eliminare i singoli file con conferma, se il tuo account ha i permessi necessari.</p>
           <nav class="breadcrumbs" aria-label="Percorso della cartella"><ol id="breadcrumbs"></ol></nav>
           <div class="toolbar">
             <button id="refresh-button" class="button" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6 7a7 7 0 0 1 12-1l2 6M4 12l2 6a7 7 0 0 0 12-1"/></svg>Aggiorna</button>
@@ -588,6 +591,18 @@
         <a id="download-link" class="button primary">Scarica originale</a>
         <a id="preview-login" class="button primary" href="/auth/login" hidden>Accedi di nuovo</a>
         <button id="preview-done" class="button" type="button">Chiudi</button>
+      </div>
+    </dialog>
+    <dialog id="delete-dialog" aria-labelledby="delete-title" aria-describedby="delete-file-name delete-description">
+      <div class="dialog-header">
+        <div><p class="eyebrow">Eliminazione da OneLake</p><h2 id="delete-title">Eliminare il file?</h2></div>
+      </div>
+      <p id="delete-file-name" class="alert"></p>
+      <p id="delete-description">Il file verr&agrave; rimosso dalla cartella in OneLake. Questa app non dispone di un cestino: non puoi annullare l'operazione dall'app.</p>
+      <p id="delete-error" class="alert error" role="alert" hidden></p>
+      <div class="dialog-actions">
+        <button id="delete-cancel" class="button" type="button" autofocus>Annulla</button>
+        <button id="delete-confirm" class="button danger" type="button">Elimina file</button>
       </div>
     </dialog>
   </body>

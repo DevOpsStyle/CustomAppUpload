@@ -8,7 +8,7 @@ import { CHUNK_BYTES } from "../server/config.js";
 import { FakeAuth, FakeStorage, jpeg, testConfig } from "./fixtures.js";
 
 for (const [name, browserType] of Object.entries({ chromium, firefox, webkit })) {
-  test(`${name}: real browser uploads, cleanup and logout preserve the trusted origin`, { timeout: 60_000 }, async (t) => {
+  test(`${name}: file actions require confirmation, respect permissions and preserve the trusted origin`, { timeout: 60_000 }, async (t) => {
     const server = createServer();
     server.listen(0, "127.0.0.1");
     await once(server, "listening");
@@ -75,6 +75,47 @@ for (const [name, browserType] of Object.entries({ chromium, firefox, webkit }))
     assert.equal((await deleted).status(), 204);
     await page.locator("#upload-list").getByText("Rimozione del caricamento incompleto confermata.").waitFor();
     assert.equal(storage.files.size, 1);
+
+    const savedPath = [...storage.files.keys()][0];
+    assert.ok(savedPath);
+    const savedName = savedPath.split("/").at(-1);
+    assert.ok(savedName);
+    storage.seed("Piano 1/keep.jpg", jpeg());
+    await page.locator("#view-destination-button").click();
+    const removeButton = page.getByRole("button", { name: `Elimina file ${savedName}`, exact: true });
+    await removeButton.waitFor({ state: "visible" });
+    assert.equal(await page.getByRole("button", { name: "Elimina file Piano 1", exact: true }).count(), 0);
+    await removeButton.click();
+    assert.equal(await page.locator("#delete-file-name").textContent(), savedName);
+    assert.equal(await page.evaluate(() => document.activeElement?.id), "delete-cancel");
+    await page.locator("#delete-cancel").click();
+    assert.equal(storage.deleteCalls, 0);
+    assert.equal(await removeButton.evaluate((button) => button === document.activeElement), true);
+
+    storage.deleteForbidden = true;
+    await removeButton.click();
+    const forbidden = page.waitForResponse((result) =>
+      new URL(result.url()).pathname === "/api/files" && result.request().method() === "DELETE");
+    await page.locator("#delete-confirm").click();
+    assert.equal((await forbidden).status(), 403);
+    await page.locator("#delete-error").filter({ hasText: "Non hai il permesso" }).waitFor();
+    assert.equal(storage.files.has(savedPath), true);
+    assert.equal(storage.deleteCalls, 0);
+    await page.locator("#delete-cancel").click();
+
+    storage.deleteForbidden = false;
+    await page.setViewportSize({ width: 320, height: 780 });
+    await removeButton.click();
+    assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth), true);
+    const removed = page.waitForResponse((result) =>
+      new URL(result.url()).pathname === "/api/files" && result.request().method() === "DELETE");
+    await page.locator("#delete-confirm").click();
+    assert.equal((await removed).status(), 204);
+    await page.locator("#global-notice").filter({ hasText: "eliminato da OneLake." }).waitFor();
+    assert.equal(storage.files.has(savedPath), false);
+    assert.equal(storage.files.has("Piano 1/keep.jpg"), true);
+    assert.equal(storage.deleteCalls, 1);
+    assert.equal(await removeButton.count(), 0);
 
     const loggedOut = page.waitForResponse((result) => new URL(result.url()).pathname === "/auth/logout");
     await page.locator("#logout-button").click();

@@ -47,6 +47,7 @@ test("anonymous users cannot list, read, upload, finalize or forge platform iden
   const { agent, storage } = await fixture(t);
   await agent.get("/api/files").expect(401);
   await agent.get("/api/files/content").query({ path: "secret.jpg" }).expect(401);
+  await agent.delete("/api/files").query({ path: "secret.jpg" }).expect(401);
   await agent.get("/api/files").set("X-MS-CLIENT-PRINCIPAL", "forged").expect(401);
   await agent.post("/api/uploads").send({ fileName: "photo.jpg", path: "", size: 64 }).expect(401);
   await agent.post("/api/uploads/guessed/complete").expect(401);
@@ -185,4 +186,51 @@ test("logout destroys the session and expired sessions cannot access files", asy
   await agent.get("/auth/callback").query({ state, code: "test" });
   assert.equal((await agent.get("/api/me")).body.authenticated, false);
   await agent.get("/api/files").expect(401);
+});
+
+test("file deletion removes only the selected file and returns 204 after confirmation by storage", async (t) => {
+  const { agent, storage } = await fixture(t);
+  const csrf = await signIn(agent);
+  storage.seed("Piano 1/photo.jpg", jpeg());
+  storage.seed("Piano 1/keep.jpg", jpeg());
+  await agent.delete("/api/files").query({ path: "Piano 1/photo.jpg" })
+    .set("Origin", "http://localhost:3000").set("X-CSRF-Token", csrf).expect(204);
+  assert.equal(storage.files.has("Piano 1/photo.jpg"), false);
+  assert.equal(storage.files.has("Piano 1/keep.jpg"), true);
+  assert.equal(storage.deleteCalls, 1);
+  const result = await agent.get("/api/files").query({ path: "Piano 1" }).expect(200);
+  assert.equal(result.body.entries.length, 1);
+  assert.equal(result.body.entries[0].path, "Piano 1/keep.jpg");
+});
+
+test("file deletion requires CSRF, configured origin, valid path and OneLake write permission", async (t) => {
+  const { agent, storage } = await fixture(t);
+  const csrf = await signIn(agent);
+  const headers = { Origin: "http://localhost:3000", "X-CSRF-Token": csrf };
+  storage.seed("photo.jpg", jpeg());
+  storage.seed("folder/keep.jpg", jpeg());
+  await agent.delete("/api/files?path=photo.jpg").expect(403);
+  await agent.delete("/api/files?path=photo.jpg").set("Origin", "null").set("X-CSRF-Token", csrf).expect(403);
+  await agent.delete("/api/files?path=photo.jpg").set("Origin", "https://evil.example.invalid").set("X-CSRF-Token", csrf).expect(403);
+  await agent.delete("/api/files?path=photo.jpg").set(headers).set("X-CSRF-Token", "wrong").expect(403);
+  for (const path of ["", "../photo.jpg", "folder/../photo.jpg", ".upload-private.part"]) {
+    await agent.delete("/api/files").query({ path }).set(headers).expect(400);
+  }
+  const directory = await agent.delete("/api/files?path=folder").set(headers).expect(400);
+  assert.equal(directory.body.error.code, "DIRECTORY_DELETE_NOT_ALLOWED");
+  storage.deleteForbidden = true;
+  await agent.get("/api/files").expect(200);
+  const denied = await agent.delete("/api/files?path=photo.jpg").set(headers).expect(403);
+  assert.equal(denied.body.error.code, "ONELAKE_FORBIDDEN");
+  assert.equal(storage.files.size, 2);
+  assert.equal(storage.deleteCalls, 0);
+});
+
+test("file deletion does not report a missing file as a successful deletion", async (t) => {
+  const { agent, storage } = await fixture(t);
+  const csrf = await signIn(agent);
+  const missing = await agent.delete("/api/files?path=missing.jpg")
+    .set("Origin", "http://localhost:3000").set("X-CSRF-Token", csrf).expect(404);
+  assert.equal(missing.body.error.code, "NOT_FOUND");
+  assert.equal(storage.deleteCalls, 0);
 });

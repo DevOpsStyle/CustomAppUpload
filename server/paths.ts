@@ -17,7 +17,7 @@ export function relativePath(value: unknown, allowEmpty = true): string {
 }
 
 export function joinPath(folder: string, name: string): string {
-  return folder ? `${folder}/${name}` : name;
+  return folder && name ? `${folder}/${name}` : folder || name;
 }
 
 export function fileNameOf(path: string): string {

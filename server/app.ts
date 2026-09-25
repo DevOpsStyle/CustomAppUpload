@@ -211,6 +211,11 @@ export async function createApplication(config: AppConfig, dependencies: Applica
     if (cursor && cursor.length > 8192) throw new AppError(400, "INVALID_CURSOR", "Pagina non valida.");
     res.json(await storage(currentUser(req)).list(path, cursor));
   });
+  app.delete("/api/files", async (req, res) => {
+    const path = relativePath(queryString(req.query.path), false);
+    await storage(currentUser(req)).deleteFile(path);
+    res.status(204).end();
+  });
   app.get("/api/files/content", async (req, res) => {
     const path = relativePath(queryString(req.query.path), false);
     const files = storage(currentUser(req));

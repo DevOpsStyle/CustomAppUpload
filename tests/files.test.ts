@@ -2,9 +2,17 @@ import assert from "node:assert/strict";
 import { test } from "node:test";
 import { AppError } from "../server/errors.js";
 import { mediaInfo, safeUploadName, verifyMediaHeader } from "../server/media.js";
-import { relativePath } from "../server/paths.js";
+import { joinPath, relativePath } from "../server/paths.js";
 import { parseRange } from "../server/ranges.js";
 import { jpeg } from "./fixtures.js";
+
+test("joining an empty path keeps the directory unchanged without adding a slash", () => {
+  assert.equal(joinPath("lakehouse-id/Files/demo", ""), "lakehouse-id/Files/demo");
+  assert.equal(joinPath("", "photo.jpg"), "photo.jpg");
+  assert.equal(joinPath("", ""), "");
+  assert.equal(joinPath("Files/demo", "Piano 1/photo.jpg"), "Files/demo/Piano 1/photo.jpg");
+  assert.throws(() => relativePath(joinPath("demo", "../private")), AppError);
+});
 
 test("relative paths stay within the configured root", () => {
   assert.equal(relativePath(""), "");
