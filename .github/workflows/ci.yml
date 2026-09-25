@@ -1,0 +1,40 @@
+name: Validate application and container
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+      - run: npm ci
+      - run: npm run check
+      - name: Build Linux container
+        run: docker build --tag cantieri-upload:ci .
+      - name: Smoke test without credentials
+        run: |
+          docker run --detach --name cantieri-smoke --publish 127.0.0.1:8080:8080 cantieri-upload:ci
+          curl --fail --retry 15 --retry-connrefused --retry-all-errors --retry-delay 1 --max-time 5 http://localhost:8080/healthz
+          test "$(curl --silent --output /dev/null --write-out '%{http_code}' http://localhost:8080/readyz)" = "503"
+          test "$(docker exec cantieri-smoke id -u)" != "0"
+      - name: Container logs and cleanup
+        if: always()
+        run: |
+          if docker container inspect cantieri-smoke > /dev/null 2>&1; then
+            docker logs cantieri-smoke
+            docker rm --force cantieri-smoke
+          fi

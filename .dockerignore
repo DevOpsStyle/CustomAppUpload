@@ -1,0 +1,17 @@
+**
+!package.json
+!package-lock.json
+!tsconfig.json
+!tsconfig.build.json
+!server/
+!server/**
+!shared/
+!shared/**
+!public/
+!public/**
+!scripts/
+!scripts/copy-public.mjs
+**/.env
+**/.env.*
+**/*.pem
+**/*.key

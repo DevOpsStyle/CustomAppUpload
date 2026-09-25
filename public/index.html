@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="it">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="description" content="Foto e video di cantiere, nel tuo spazio Microsoft Fabric OneLake.">
+    <title>Materiali di cantiere</title>
+    <script nonce="__CSP_NONCE__">
+      (() => {
+        const param = new URLSearchParams(window.location.search).get("scoutTheme");
+        const theme =
+          param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+        document.documentElement.setAttribute("data-theme", theme);
+      })();
+    </script>
+    <style nonce="__CSP_NONCE__">
+      :root {
+        color-scheme: light;
+        --cp-bg: #f7f4ef;
+        --cp-bg-elevated: #fcfbf8;
+        --cp-surface: #ffffff;
+        --cp-surface-soft: #f5f5f5;
+        --cp-border: #dedede;
+        --cp-border-strong: #919191;
+        --cp-text: #242424;
+        --cp-text-muted: #5c5c5c;
+        --cp-text-soft: #6f6f6f;
+        --cp-accent: #b11f4b;
+        --cp-accent-hover: #9a1a41;
+        --cp-accent-soft: rgba(177, 31, 75, 0.08);
+        --cp-accent-fg: #ffffff;
+        --cp-success: #16a34a;
+        --cp-danger: #dc2626;
+        --cp-warning: #f59e0b;
+        --cp-link: #0078d4;
+        --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+        --cp-overlay: rgba(255, 255, 255, 0.8);
+        --cp-panel: rgba(255, 255, 255, 0.86);
+        --cp-panel-strong: rgba(255, 255, 255, 0.96);
+        --cp-sheen: rgba(255, 255, 255, 0.55);
+        --cp-highlight: rgba(177, 31, 75, 0.12);
+      }
+      html[data-theme="dark"] {
+        color-scheme: dark;
+        --cp-bg: #3d3b3a;
+        --cp-bg-elevated: #343231;
+        --cp-surface: #292929;
+        --cp-surface-soft: #2e2e2e;
+        --cp-border: #474747;
+        --cp-border-strong: #5f5f5f;
+        --cp-text: #dedede;
+        --cp-text-muted: #919191;
+        --cp-text-soft: #b0b0b0;
+        --cp-accent: #fd8ea1;
+        --cp-accent-hover: #fb7b91;
+        --cp-accent-soft: rgba(253, 142, 161, 0.14);
+        --cp-accent-fg: #1a1a1a;
+        --cp-success: #4ade80;
+        --cp-danger: #f87171;
+        --cp-warning: #fbbf24;
+        --cp-link: #4da6ff;
+        --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+        --cp-overlay: rgba(41, 41, 41, 0.88);
+        --cp-panel: rgba(41, 41, 41, 0.72);
+        --cp-panel-strong: rgba(41, 41, 41, 0.96);
+        --cp-sheen: rgba(255, 255, 255, 0.04);
+        --cp-highlight: rgba(253, 142, 161, 0.12);
+      }
+
+      * { box-sizing: border-box; }
+      [hidden] { display: none !important; }
+      html { min-width: 240px; scroll-padding-block: 24px; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        min-height: 100svh;
+        display: flex;
+        flex-direction: column;
+        background: var(--cp-bg);
+        color: var(--cp-text);
+        font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif;
+        font-size: 1rem;
+        line-height: 1.5;
+        -webkit-text-size-adjust: 100%;
+      }
+      body.dialog-open { overflow: hidden; }
+      button, input, a { -webkit-tap-highlight-color: var(--cp-highlight); }
+      button, input { font: inherit; }
+      button { cursor: pointer; }
+      button, a { touch-action: manipulation; }
+      button:disabled, [aria-disabled="true"] { cursor: not-allowed; opacity: 0.55; }
+      a { color: var(--cp-accent); text-underline-offset: 3px; }
+      :focus-visible { outline: 3px solid var(--cp-accent); outline-offset: 4px; }
+      h1, h2, p { margin: 0; }
+      h1 { font-size: clamp(1.875rem, 5vw, 2.75rem); line-height: 1.16; letter-spacing: -0.035em; }
+      h2 { font-size: 1.25rem; line-height: 1.3; }
+      code { font-family: Consolas, "Courier New", Courier, monospace; font-size: 0.875rem; }
+      .muted, .description, .fine-print { color: var(--cp-text-muted); }
+      .fine-print { font-size: 0.875rem; }
+      .description { margin-top: 12px; max-width: 56ch; }
+      .eyebrow {
+        margin-bottom: 8px;
+        font-size: 0.75rem;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--cp-text-muted);
+      }
+      .icon {
+        display: block;
+        flex: 0 0 auto;
+        width: 24px;
+        height: 24px;
+        fill: none;
+        stroke: var(--cp-text-muted);
+        stroke-width: 1.75;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+      .skip-link {
+        position: fixed;
+        top: 8px;
+        left: 8px;
+        z-index: 10;
+        padding: 12px 16px;
+        border-radius: 0.625rem;
+        background: var(--cp-surface);
+        transform: translateY(-180%);
+      }
+      .skip-link:focus { transform: translateY(0); }
+      .site-header {
+        padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right)) 16px max(16px, env(safe-area-inset-left));
+        border-bottom: 1px solid var(--cp-border);
+        background: var(--cp-bg-elevated);
+      }
+      .header-inner {
+        max-width: 960px;
+        margin: auto;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .brand-mark, .hero-symbol, .action-icon, .avatar {
+        display: grid;
+        place-items: center;
+        flex: 0 0 auto;
+        background: var(--cp-accent-soft);
+        color: var(--cp-accent);
+        border-radius: 0.625rem;
+      }
+      .brand-mark { width: 44px; height: 44px; }
+      .brand-mark .icon, .hero-symbol .icon, .action-icon .icon { stroke: var(--cp-accent); }
+      .brand-name { display: block; font-size: 1rem; font-weight: 700; letter-spacing: -0.02em; }
+      .brand-subtitle { display: block; color: var(--cp-text-muted); font-size: 0.8125rem; }
+      main {
+        width: 100%;
+        max-width: 992px;
+        flex: 1;
+        margin: 0 auto;
+        padding: 24px max(16px, env(safe-area-inset-right)) 40px max(16px, env(safe-area-inset-left));
+      }
+      .gate { max-width: 600px; margin: 24px auto; }
+      .gate h1 { max-width: 18ch; }
+      .hero-symbol { width: 64px; height: 64px; margin-bottom: 24px; border-radius: 16px; }
+      .hero-symbol .icon { width: 32px; height: 32px; }
+      .gate .button { margin-top: 24px; width: 100%; }
+      .gate .fine-print { margin-top: 16px; }
+      .login-context {
+        margin-top: 24px;
+        padding: 16px;
+        border: 1px solid var(--cp-border);
+        border-radius: 16px;
+        background: var(--cp-surface);
+        overflow-wrap: anywhere;
+      }
+      .login-context strong, .login-context code { display: block; }
+      .login-context code { margin-top: 4px; color: var(--cp-text-muted); }
+      .button {
+        min-height: 48px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 16px;
+        border: 1px solid var(--cp-border-strong);
+        border-radius: 0.625rem;
+        background: var(--cp-surface);
+        color: var(--cp-text);
+        font-weight: 600;
+        line-height: 1.35;
+        text-align: center;
+        text-decoration: none;
+        overflow-wrap: anywhere;
+      }
+      .button.primary { background: var(--cp-accent); border-color: var(--cp-accent); color: var(--cp-accent-fg); }
+      .button.primary .icon { stroke: var(--cp-accent-fg); }
+      .button.quiet { background: var(--cp-bg); border-color: var(--cp-border); }
+      .button.danger { border-color: var(--cp-danger); }
+      .microsoft-symbol { width: 20px; height: 20px; fill: var(--cp-accent-fg); flex: 0 0 auto; }
+      .text-button {
+        min-height: 44px;
+        min-width: 44px;
+        padding: 8px 12px;
+        border: 1px solid var(--cp-border);
+        border-radius: 0.625rem;
+        background: var(--cp-surface);
+        color: var(--cp-text);
+        font-size: 0.875rem;
+        font-weight: 600;
+      }
+      .profile {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-bottom: 24px;
+        margin-bottom: 24px;
+        border-bottom: 1px solid var(--cp-border);
+      }
+      .avatar { width: 40px; height: 40px; font-size: 0.875rem; font-weight: 700; }
+      .profile-copy { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+      .profile-copy strong { display: block; font-size: 0.9375rem; }
+      .profile-copy p { font-size: 0.8125rem; color: var(--cp-text-muted); }
+      .back-button { margin-bottom: 20px; }
+      .destination {
+        display: flex;
+        align-items: flex-start;
+        gap: 12px;
+        margin: 24px 0;
+        padding: 16px;
+        background: var(--cp-bg-elevated);
+        border: 1px solid var(--cp-border);
+        border-radius: 16px;
+      }
+      .destination > .icon { margin-top: 4px; }
+      .destination-copy { min-width: 0; overflow-wrap: anywhere; }
+      .destination-copy strong { display: block; font-size: 1.125rem; }
+      .resource-line { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 4px; }
+      .destination code { display: inline-block; margin-top: 8px; color: var(--cp-text-muted); }
+      .main-actions { display: grid; gap: 16px; }
+      .action-card {
+        display: flex;
+        width: 100%;
+        min-height: 136px;
+        align-items: center;
+        gap: 16px;
+        padding: 24px 20px;
+        border: 1px solid var(--cp-border);
+        border-radius: 16px;
+        background: var(--cp-surface);
+        color: var(--cp-text);
+        text-align: left;
+        box-shadow: 0 1px 2px var(--cp-highlight);
+      }
+      .action-card.upload-action { border-color: var(--cp-accent); }
+      .action-icon { width: 48px; height: 48px; }
+      .action-copy { flex: 1; min-width: 0; overflow-wrap: anywhere; }
+      .action-copy strong { display: block; font-size: 1.1875rem; line-height: 1.3; letter-spacing: -0.02em; }
+      .action-copy span { display: block; margin-top: 8px; font-size: 0.9375rem; color: var(--cp-text-muted); }
+      .dashboard-note { margin-top: 24px; max-width: 66ch; }
+      .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0; }
+      .toolbar .button { flex: 1; }
+      .breadcrumbs { margin-top: 24px; padding: 12px; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-bg-elevated); }
+      .breadcrumbs ol { list-style: none; display: flex; flex-wrap: wrap; align-items: center; gap: 0 4px; margin: 0; padding: 0; }
+      .breadcrumbs li { display: flex; align-items: center; min-width: 0; max-width: 100%; }
+      .breadcrumbs li + li::before { content: "/"; padding: 0 8px 0 4px; color: var(--cp-text-soft); }
+      .crumb {
+        min-height: 44px;
+        max-width: 100%;
+        padding: 8px;
+        border: 0;
+        border-radius: 0.625rem;
+        background: var(--cp-bg-elevated);
+        color: var(--cp-accent);
+        overflow-wrap: anywhere;
+        text-align: left;
+      }
+      .crumb[aria-current="page"] { color: var(--cp-text); font-weight: 600; }
+      .list-status { margin-bottom: 12px; font-size: 0.875rem; color: var(--cp-text-muted); }
+      .file-list, .upload-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+      .file-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        width: 100%;
+        min-height: 80px;
+        padding: 16px;
+        border: 1px solid var(--cp-border);
+        border-radius: 0.625rem;
+        background: var(--cp-surface);
+        color: var(--cp-text);
+        text-align: left;
+      }
+      .file-copy { min-width: 0; flex: 1; }
+      .file-name { display: block; font-weight: 600; overflow-wrap: anywhere; }
+      .file-meta { display: block; margin-top: 4px; font-size: 0.8125rem; color: var(--cp-text-muted); overflow-wrap: anywhere; }
+      .file-card > .icon:last-child { width: 20px; height: 20px; }
+      .empty-state { padding: 32px 20px; text-align: center; border: 1px dashed var(--cp-border-strong); border-radius: 16px; }
+      .empty-state .icon { margin: 0 auto 12px; width: 32px; height: 32px; }
+      .empty-state p + p { margin-top: 8px; }
+      .load-more { width: 100%; margin-top: 16px; }
+      .alert {
+        margin: 16px 0;
+        padding: 16px;
+        border: 1px solid var(--cp-border-strong);
+        border-left: 4px solid var(--cp-accent);
+        border-radius: 0.625rem;
+        background: var(--cp-surface);
+        color: var(--cp-text);
+        overflow-wrap: anywhere;
+        white-space: pre-line;
+      }
+      .alert.error { border-left-color: var(--cp-danger); }
+      .alert h2 { font-size: 1.0625rem; margin-bottom: 8px; }
+      .alert .button { margin-top: 16px; }
+      .code-list { padding-left: 20px; margin: 16px 0 0; overflow-wrap: anywhere; }
+      .code-list li { margin: 8px 0; }
+      .spinner-row { display: flex; align-items: center; gap: 12px; margin-top: 16px; }
+      .spinner { width: 20px; height: 20px; border: 2px solid var(--cp-border); border-top-color: var(--cp-accent); border-radius: 50%; animation: spin 0.8s linear infinite; flex: 0 0 auto; }
+      .picker-panel { padding: 20px; border: 1px solid var(--cp-border); border-radius: 16px; background: var(--cp-surface); }
+      .picker-actions { display: grid; gap: 12px; margin-bottom: 16px; }
+      .format-help { font-size: 0.875rem; color: var(--cp-text-muted); }
+      .format-help + .format-help { margin-top: 8px; }
+      .phone-note { display: flex; align-items: flex-start; gap: 12px; margin: 20px 0; padding: 16px; border-radius: 0.625rem; background: var(--cp-accent-soft); }
+      .phone-note p { min-width: 0; font-size: 0.875rem; }
+      .queue-header { margin: 24px 0 12px; }
+      .queue-header h2 { font-size: 1.125rem; }
+      .queue-header p { margin-top: 4px; font-size: 0.875rem; color: var(--cp-text-muted); }
+      .upload-item { padding: 16px; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-surface); min-width: 0; }
+      .upload-item[data-state="failed"], .upload-item[data-state="invalid"] { border-left: 4px solid var(--cp-danger); }
+      .upload-item[data-state="completed"] { border-left: 4px solid var(--cp-success); }
+      .upload-item-header { display: flex; align-items: flex-start; gap: 12px; }
+      .upload-item-header > div { flex: 1; min-width: 0; }
+      .upload-item-header strong { display: block; font-size: 0.9375rem; overflow-wrap: anywhere; }
+      .upload-state { font-size: 0.8125rem; color: var(--cp-text-muted); }
+      .upload-detail { font-size: 0.875rem; margin-top: 8px; overflow-wrap: anywhere; white-space: pre-line; }
+      progress { display: block; width: 100%; height: 8px; margin-top: 12px; border: 0; border-radius: 4px; overflow: hidden; background: var(--cp-surface-soft); accent-color: var(--cp-accent); }
+      progress::-webkit-progress-bar { background: var(--cp-surface-soft); border-radius: 4px; }
+      progress::-webkit-progress-value { background: var(--cp-accent); border-radius: 4px; }
+      progress::-moz-progress-bar { background: var(--cp-accent); border-radius: 4px; }
+      .upload-item[data-state="completed"] progress { accent-color: var(--cp-success); }
+      .upload-item[data-state="completed"] progress::-webkit-progress-value { background: var(--cp-success); }
+      .upload-item[data-state="completed"] progress::-moz-progress-bar { background: var(--cp-success); }
+      .upload-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+      .upload-actions .button { flex: 1 1 180px; }
+      .site-footer {
+        padding: 20px max(16px, env(safe-area-inset-right)) max(24px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+        border-top: 1px solid var(--cp-border);
+      }
+      .footer-inner { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 16px; max-width: 960px; margin: auto; font-size: 0.75rem; color: var(--cp-text-muted); }
+      .badge { display: inline-flex; gap: 6px; align-items: center; padding: 4px 8px; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-bg-elevated); }
+      .badge .icon { width: 16px; height: 16px; }
+      dialog {
+        width: min(calc(100% - 24px - env(safe-area-inset-left) - env(safe-area-inset-right)), 800px);
+        max-height: calc(100vh - 32px);
+        max-height: calc(100dvh - 32px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+        padding: 20px;
+        border: 1px solid var(--cp-border-strong);
+        border-radius: 16px;
+        background: var(--cp-surface);
+        color: var(--cp-text);
+        overflow-y: auto;
+        overscroll-behavior: contain;
+      }
+      dialog::backdrop { background: var(--cp-overlay); }
+      .dialog-header { display: flex; align-items: flex-start; gap: 16px; }
+      .dialog-header > div { flex: 1; min-width: 0; }
+      .dialog-header h2 { overflow-wrap: anywhere; }
+      .icon-button { width: 44px; height: 44px; padding: 10px; flex: 0 0 auto; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-surface); }
+      .preview-details { margin: 12px 0 16px; font-size: 0.875rem; color: var(--cp-text-muted); overflow-wrap: anywhere; }
+      .preview-body { min-height: 160px; display: grid; place-items: center; padding: 12px; border: 1px solid var(--cp-border); border-radius: 0.625rem; background: var(--cp-bg-elevated); }
+      .preview-body img, .preview-body video { display: block; max-width: 100%; width: 100%; max-height: 55vh; max-height: 55svh; object-fit: contain; }
+      .preview-body > .icon { width: 48px; height: 48px; }
+      .preview-status { margin-top: 12px; font-size: 0.875rem; color: var(--cp-text-muted); }
+      .dialog-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 20px; }
+      .dialog-actions .button { flex: 1 1 160px; }
+      html[data-theme="dark"] :is(.muted, .description, .fine-print, .eyebrow, .brand-subtitle, .login-context code, .profile-copy p, .destination code, .action-copy span, .list-status, .file-meta, .format-help, .queue-header p, .upload-state, .footer-inner, .preview-details, .preview-status) { color: var(--cp-text-soft); }
+      @keyframes spin { to { transform: rotate(360deg); } }
+      @media (hover: hover) {
+        .button:not(:disabled):not([aria-disabled="true"]):hover, .text-button:not(:disabled):hover { background: var(--cp-surface-soft); }
+        .button.primary:not(:disabled):hover { background: var(--cp-accent-hover); border-color: var(--cp-accent-hover); }
+        .action-card:not(:disabled):hover, .file-card:not(:disabled):hover { border-color: var(--cp-accent); background: var(--cp-bg-elevated); }
+        .crumb:not(:disabled):hover { background: var(--cp-accent-soft); }
+      }
+      @media (min-width: 640px) {
+        main { padding-top: 32px; }
+        .gate { margin-top: 48px; }
+        .gate .button { width: auto; min-width: 260px; }
+        .main-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .action-card { flex-wrap: wrap; align-content: flex-start; min-height: 208px; padding: 24px; }
+        .action-copy { flex-basis: calc(100% - 72px); }
+        .action-card > .icon { margin-left: auto; }
+        .picker-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .toolbar .button { flex: 0 1 auto; }
+        dialog { padding: 24px; }
+      }
+      @media (max-width: 359px) {
+        .action-card { gap: 12px; padding: 20px 16px; }
+        .action-icon { width: 40px; height: 40px; }
+        .action-card > .icon { display: none; }
+        .profile { gap: 8px; }
+        .avatar { width: 32px; height: 32px; }
+        .picker-panel { padding: 16px; }
+        dialog { padding: 16px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        *, *::before, *::after { animation: none !important; scroll-behavior: auto !important; }
+      }
+    </style>
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Vai al contenuto</a>
+    <header class="site-header">
+      <div class="header-inner">
+        <span class="brand-mark" aria-hidden="true">
+          <svg class="icon" viewBox="0 0 24 24"><path d="M4 20V8l8-4 8 4v12M8 20v-5h8v5M3 20h18M8 9h.01M16 9h.01M8 12h.01M16 12h.01"/></svg>
+        </span>
+        <div><span class="brand-name">Materiali di cantiere</span><span class="brand-subtitle">Workspace Cantieri</span></div>
+      </div>
+    </header>
+
+    <main id="main-content" tabindex="-1">
+      <noscript><p class="alert error">Per accedere e gestire i file, attiva JavaScript nel browser.</p></noscript>
+      <p id="login-error" class="alert error" role="alert" hidden></p>
+
+      <section id="loading-view" class="gate" aria-labelledby="loading-title" aria-busy="true">
+        <p class="eyebrow">Il tuo spazio di lavoro</p>
+        <h1 id="loading-title">Prepariamo il tuo cantiere.</h1>
+        <p class="spinner-row" role="status"><span class="spinner" aria-hidden="true"></span>Verifica dell'accesso in corso&hellip;</p>
+      </section>
+
+      <section id="login-view" class="gate" aria-labelledby="login-title" hidden>
+        <div class="hero-symbol" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10H3Z"/><path d="M12 11v5m-2-2 2 2 2-2"/></svg></div>
+        <p class="eyebrow">Dal cantiere, al tuo team</p>
+        <h1 id="login-title" tabindex="-1">Il materiale giusto. A portata di mano.</h1>
+        <p class="description">Consulta e carica foto e video dal telefono, nel tuo spazio di lavoro aziendale.</p>
+        <div class="login-context">
+          <span class="fine-print">Workspace Cantieri</span>
+          <strong>MaterialiCantiere</strong>
+          <code>Files/demo</code>
+        </div>
+        <a class="button primary" href="/auth/login">
+          <svg class="microsoft-symbol" viewBox="0 0 20 20" aria-hidden="true"><path d="M1 1h8v8H1zM11 1h8v8h-8zM1 11h8v8H1zM11 11h8v8h-8z"/></svg>
+          Accedi con Microsoft
+        </a>
+        <p class="fine-print">Usa il tuo account Microsoft aziendale dello stesso tenant. L'accesso ai file rispetta le autorizzazioni assegnate in Microsoft Fabric.</p>
+      </section>
+
+      <section id="setup-view" class="gate" aria-labelledby="setup-title" hidden>
+        <p class="eyebrow">Configurazione richiesta</p>
+        <h1 id="setup-title" tabindex="-1">Manca ancora un passaggio.</h1>
+        <p class="description">L'app non &egrave; ancora configurata. Chiedi al responsabile della demo di impostare queste variabili sul server:</p>
+        <ul id="missing-variables" class="code-list"></ul>
+        <p class="fine-print">Qui mostriamo solo i nomi delle variabili, mai credenziali o valori.</p>
+        <button id="setup-retry" class="button" type="button">Verifica di nuovo</button>
+      </section>
+
+      <section id="connection-view" class="gate" aria-labelledby="connection-title" hidden>
+        <p class="eyebrow">Connessione non disponibile</p>
+        <h1 id="connection-title" tabindex="-1">Non riusciamo a raggiungere il servizio.</h1>
+        <p id="connection-error" class="alert error" role="alert"></p>
+        <button id="session-retry" class="button" type="button">Riprova</button>
+      </section>
+
+      <aside id="session-expired" class="alert error" role="alert" hidden>
+        <h2>La sessione &egrave; scaduta</h2>
+        <p>Accedi di nuovo con il tuo account Microsoft aziendale. I caricamenti non confermati non risultano completati; dopo l'accesso, verifica la cartella prima di riprovare.</p>
+        <p id="session-error-detail" hidden></p>
+        <a class="button primary" href="/auth/login">Accedi di nuovo</a>
+      </aside>
+
+      <div id="app-view" hidden>
+        <div class="profile" aria-label="Account connesso">
+          <span id="user-avatar" class="avatar" aria-hidden="true"></span>
+          <div class="profile-copy"><strong id="user-name"></strong><p id="user-username"></p></div>
+          <button id="logout-button" class="text-button" type="button">Esci</button>
+        </div>
+        <p id="global-notice" class="alert error" role="alert" hidden></p>
+        <button id="back-button" class="button quiet back-button" type="button" hidden>
+          <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m10 6-6 6 6 6M4 12h16"/></svg>
+          <span id="back-label">Torna alla home</span>
+        </button>
+
+        <section id="dashboard-view" aria-labelledby="dashboard-title">
+          <p class="eyebrow">Benvenuto nel tuo spazio</p>
+          <h1 id="dashboard-title" tabindex="-1">Cosa vuoi fare?</h1>
+          <p class="description">Tutto il materiale del cantiere, in un unico posto.</p>
+          <div class="destination">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10H3Z"/></svg>
+            <div class="destination-copy">
+              <p class="fine-print">Cartella di lavoro</p>
+              <strong id="folder-label"></strong>
+              <div class="resource-line fine-print"><span>Workspace: Cantieri</span><span>Lakehouse: MaterialiCantiere</span></div>
+              <code>Files/demo</code>
+            </div>
+          </div>
+          <div class="main-actions">
+            <button id="browse-button" class="action-card" type="button">
+              <span class="action-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10H3Z"/><path d="M7 12h10M7 15h6"/></svg></span>
+              <span class="action-copy"><strong>Visualizza materiale</strong><span>Sfoglia cartelle, foto e video del tuo team.</span></span>
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+            </button>
+            <button id="upload-button" class="action-card upload-action" type="button">
+              <span class="action-icon" aria-hidden="true"><svg class="icon" viewBox="0 0 24 24"><path d="M4 15v5h16v-5M12 16V4m-5 5 5-5 5 5"/></svg></span>
+              <span class="action-copy"><strong>Carica foto o video</strong><span>Scegli dalla galleria o usa la fotocamera.</span></span>
+              <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>
+            </button>
+          </div>
+          <p class="fine-print dashboard-note">Un solo spazio condiviso: i file vengono letti e salvati in Microsoft Fabric OneLake, con le autorizzazioni del tuo account.</p>
+        </section>
+
+        <section id="files-view" aria-labelledby="files-title" hidden>
+          <p class="eyebrow">Il materiale del team</p>
+          <h1 id="files-title" tabindex="-1">Visualizza materiale</h1>
+          <p class="description">Apri una cartella o seleziona un file per vederne l'anteprima. Gli originali si caricano solo quando li apri.</p>
+          <nav class="breadcrumbs" aria-label="Percorso della cartella"><ol id="breadcrumbs"></ol></nav>
+          <div class="toolbar">
+            <button id="refresh-button" class="button" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M6 7a7 7 0 0 1 12-1l2 6M4 12l2 6a7 7 0 0 0 12-1"/></svg>Aggiorna</button>
+            <button id="upload-here-button" class="button" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 15v5h16v-5M12 16V4m-5 5 5-5 5 5"/></svg>Carica qui</button>
+          </div>
+          <p id="files-status" class="list-status" role="status" aria-live="polite"></p>
+          <div id="files-error-box" class="alert error" hidden>
+            <p id="files-error" role="alert"></p>
+            <button id="files-retry" class="button" type="button">Riprova</button>
+          </div>
+          <div id="empty-files" class="empty-state" hidden>
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10H3Z"/></svg>
+            <p><strong>Qui c'&egrave; spazio per il tuo materiale.</strong></p>
+            <p class="fine-print">La cartella &egrave; vuota. Usa &ldquo;Carica qui&rdquo; per aggiungere foto o video.</p>
+          </div>
+          <ul id="file-list" class="file-list" aria-label="Contenuto della cartella"></ul>
+          <button id="load-more-button" class="button load-more" type="button" hidden>Mostra altri elementi</button>
+        </section>
+
+        <section id="upload-view" aria-labelledby="upload-title" hidden>
+          <p class="eyebrow">Dal telefono al cantiere</p>
+          <h1 id="upload-title" tabindex="-1">Carica foto o video</h1>
+          <p class="description">Scegli uno o pi&ugrave; file. Li invieremo uno alla volta, in piccole parti.</p>
+          <div class="destination">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7a2 2 0 0 1 2-2h5l2 2h7a2 2 0 0 1 2 2v10H3Z"/></svg>
+            <div class="destination-copy"><p class="fine-print">Destinazione in MaterialiCantiere</p><strong id="upload-folder-label"></strong><code id="upload-destination"></code></div>
+          </div>
+          <div class="picker-panel">
+            <div class="picker-actions">
+              <button id="pick-button" class="button primary" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="m3 16 5-5 5 5 3-3 5 5M16 7h.01"/></svg>Seleziona foto o video</button>
+              <button id="camera-button" class="button" type="button"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h4l2-3h6l2 3h4v13H3Z"/><circle cx="12" cy="13" r="4"/></svg>Usa la fotocamera</button>
+            </div>
+            <input id="file-picker" type="file" multiple accept=".jpg,.jpeg,.png,.webp,.gif,.heic,.heif,.avif,.mp4,.mov,.m4v,.webm,.3gp" hidden>
+            <input id="camera-picker" type="file" accept="image/*,video/*" capture="environment" hidden>
+            <p id="upload-limit" class="format-help"><strong>Massimo 250 MB per file.</strong></p>
+            <p class="format-help">Foto: JPG, JPEG, PNG, WEBP, GIF, HEIC, HEIF, AVIF.<br>Video: MP4, MOV, M4V, WEBM, 3GP.</p>
+            <p class="format-help">L'apertura della fotocamera dipende dal dispositivo. Le foto HEIC/HEIF possono richiedere il download per essere visualizzate.</p>
+          </div>
+          <div class="phone-note">
+            <svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="2" width="12" height="20" rx="2"/><path d="M10 18h4"/></svg>
+            <p>Tieni questa pagina aperta e il telefono attivo fino alla conferma. Cambiare app, bloccare lo schermo o perdere la connessione pu&ograve; interrompere l'invio.</p>
+          </div>
+          <div class="queue-header"><h2>File selezionati</h2><p id="queue-count">Nessun file selezionato.</p></div>
+          <ol id="upload-list" class="upload-list" aria-label="Stato dei singoli caricamenti"></ol>
+          <p id="upload-status" class="alert" role="status" aria-live="polite" hidden></p>
+          <div class="upload-actions">
+            <button id="start-upload-button" class="button primary" type="button" disabled>Avvia caricamento</button>
+            <button id="cancel-upload-button" class="button danger" type="button" hidden>Annulla caricamento</button>
+            <button id="view-destination-button" class="button" type="button" hidden>Visualizza destinazione</button>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-inner">
+        <span class="badge"><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 4 16 4 16 0V5M4 12c0 4 16 4 16 0"/></svg>Microsoft Fabric OneLake</span>
+        <span class="badge">Ambiente demo</span>
+        <span>MaterialiCantiere &middot; Files/demo</span>
+      </div>
+    </footer>
+
+    <dialog id="preview-dialog" aria-labelledby="preview-title" aria-describedby="preview-details">
+      <div class="dialog-header">
+        <div><p class="eyebrow">Anteprima del materiale</p><h2 id="preview-title"></h2></div>
+        <button id="preview-close" class="icon-button" type="button" aria-label="Chiudi anteprima" autofocus><svg class="icon" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg></button>
+      </div>
+      <p id="preview-details" class="preview-details"></p>
+      <div id="preview-body" class="preview-body"></div>
+      <p id="preview-status" class="preview-status" role="status" aria-live="polite"></p>
+      <p id="preview-error" class="alert error" role="alert" hidden></p>
+      <div class="dialog-actions">
+        <a id="download-link" class="button primary">Scarica originale</a>
+        <a id="preview-login" class="button primary" href="/auth/login" hidden>Accedi di nuovo</a>
+        <button id="preview-done" class="button" type="button">Chiudi</button>
+      </div>
+    </dialog>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": false,
+    "sourceMap": false
+  },
+  "include": ["server/**/*.ts", "shared/**/*.ts", "public/**/*.ts"],
+  "exclude": ["tests", "dist", "node_modules"]
+}
